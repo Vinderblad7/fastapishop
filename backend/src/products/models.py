@@ -14,6 +14,7 @@ class ProductModel(Base):
     updated_at: Mapped[datetime.datetime] = mapped_column(DateTime, server_default=func.now(), onupdate=func.now())
     category_id: Mapped[int] = mapped_column(ForeignKey("categories.id"), nullable=False)
     category: Mapped["CategoryModel"] = relationship(back_populates="products")
+    image_url: Mapped[str] = mapped_column()
 
     def __repr__(self) -> str:
         return f"<Product(id={self.id}, name='{self.name}')>"

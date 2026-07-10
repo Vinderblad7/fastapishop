@@ -1,8 +1,8 @@
-"""init categories and products
+"""init categories and products with images
 
-Revision ID: e4d3d80a6271
+Revision ID: 01ed7c6fccd3
 Revises: 
-Create Date: 2026-07-10 20:23:07.160107
+Create Date: 2026-07-10 22:10:20.057841
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = 'e4d3d80a6271'
+revision: str = '01ed7c6fccd3'
 down_revision: Union[str, Sequence[str], None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -38,6 +38,7 @@ def upgrade() -> None:
     sa.Column('created_at', sa.DateTime(), server_default=sa.text('now()'), nullable=False),
     sa.Column('updated_at', sa.DateTime(), server_default=sa.text('now()'), nullable=False),
     sa.Column('category_id', sa.Integer(), nullable=False),
+    sa.Column('image_url', sa.String(), nullable=False),
     sa.ForeignKeyConstraint(['category_id'], ['categories.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
