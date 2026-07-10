@@ -11,3 +11,6 @@ async def get_session():
 
 class Base(DeclarativeBase):
     pass
+
+from src.categories.models import CategoryModel
+from src.products.models import ProductModel
