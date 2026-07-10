@@ -13,3 +13,6 @@ class CategoryResponseSchema(CategoryBaseSchema):
                       description="Slug")
 
     model_config = ConfigDict(from_attributes=True)
+
+class CategoryUpdateSchema(BaseModel):
+    name: str | None = Field(None, min_length=3, max_length=100, description="New category name")

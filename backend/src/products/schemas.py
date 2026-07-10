@@ -16,7 +16,14 @@ class ProductCreateSchema(ProductBaseSchema):
 
 class ProductResponseSchema(ProductBaseSchema):
     id: int
-    created_at: datetime.datetime
-    updated_at: datetime.datetime
+    created_at: datetime
+    updated_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
+
+class ProductUpdateSchema(BaseModel):
+    name: str | None = Field(None, min_length=2, max_length=150, description="New product name")
+    description: str | None = Field(None, max_length=1000, description="New product description")
+    price: float | None = Field(None, gt=0, description="New price")
+    category_id: int | None = Field(None, description="New category ID")
+    image_url: str | None = Field(None, description="New URL or path to the product image")
