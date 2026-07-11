@@ -4,10 +4,7 @@ from slugify import slugify
 from src.dependencies import SessionDep
 
 from src.categories.schemas import CategoryCreateSchema, CategoryResponseSchema, CategoryUpdateSchema
-from src.products.schemas import ProductCreateSchema, ProductResponseSchema, ProductUpdateSchema
-
 from src.categories.models import CategoryModel
-from src.products.models import ProductModel
 
 categories_router = APIRouter(prefix="/categories", tags=["Categories"])
 
