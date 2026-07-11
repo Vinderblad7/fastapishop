@@ -14,3 +14,4 @@ class Base(DeclarativeBase):
 
 from src.categories.models import CategoryModel
 from src.products.models import ProductModel
+from src.users.models import UserModel

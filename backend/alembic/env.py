@@ -23,6 +23,7 @@ target_metadata = Base.metadata
 
 from src.categories.models import CategoryModel
 from src.products.models import ProductModel
+from src.users.models import UserModel
 
 config.set_main_option("sqlalchemy.url", settings.DATABASE_URL)
 
