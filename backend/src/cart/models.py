@@ -10,7 +10,7 @@ class CartModel(Base):
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
     product_id: Mapped[int] = mapped_column(ForeignKey("products.id", ondelete="CASCADE"), nullable=False)
     quantity: Mapped[int] = mapped_column(default=1, nullable=False)
-    product: Mapped["ProductModel"] = relationship(lazy="joined")
+    products: Mapped["ProductModel"] = relationship(lazy="joined")
     created_at: Mapped[datetime.datetime] = mapped_column(DateTime, server_default=func.now())
     updated_at: Mapped[datetime.datetime] = mapped_column(DateTime, server_default=func.now(), onupdate=func.now())
 

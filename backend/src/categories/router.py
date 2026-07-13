@@ -11,14 +11,26 @@ categories_router = APIRouter(prefix="/categories", tags=["Categories"])
 @categories_router.post("", response_model=CategoryResponseSchema, status_code=status.HTTP_201_CREATED)
 async def create_category(data: CategoryCreateSchema, session: SessionDep):
     category_slug = slugify(data.name)
-
+    
+    query = await session.execute(
+        select(CategoryModel).where(CategoryModel.slug == category_slug)
+    )
+    result = query.scalar_one_or_none()
+    
+    if result:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Category with this name/slug already exists"
+        )
+    
     category = CategoryModel(
-        name = data.name,
-        slug = category_slug
+        name=data.name,
+        slug=category_slug
     )
     session.add(category)
     await session.commit()
     await session.refresh(category)
+    
     return category
 
 @categories_router.get("", response_model=list[CategoryResponseSchema])

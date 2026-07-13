@@ -1,6 +1,5 @@
 from fastapi import APIRouter, HTTPException, status
 from sqlalchemy import select
-from slugify import slugify
 from src.dependencies import SessionDep
 from src.products.schemas import ProductCreateSchema, ProductResponseSchema, ProductUpdateSchema
 from src.products.models import ProductModel

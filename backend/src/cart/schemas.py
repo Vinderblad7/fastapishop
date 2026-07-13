@@ -10,8 +10,11 @@ class CartResponseSchema(BaseModel):
     id: int
     product_id: int = Field(..., description="Product ID")
     quantity: int = Field(..., description="Product quantity")
-    product: ProductResponseSchema
+    products: ProductResponseSchema
     created_at: datetime
     updated_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
+
+class CartUpdateSchema(BaseModel):
+    quantity: int = Field(..., ge=1, description="New quantity")
