@@ -10,5 +10,8 @@ class UserModel(Base):
     email: Mapped[str] = mapped_column(String(255), unique=True)
     username: Mapped[str] = mapped_column(String(100), unique=True)
     hashed_password: Mapped[str]
+
+    is_superuser: Mapped[bool] = mapped_column(default=False, server_default="false")
+
     created_at: Mapped[datetime.datetime] = mapped_column(DateTime, server_default=func.now())
     updated_at: Mapped[datetime.datetime] = mapped_column(DateTime, server_default=func.now(), onupdate=func.now())
