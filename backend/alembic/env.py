@@ -25,6 +25,7 @@ from src.categories.models import CategoryModel
 from src.products.models import ProductModel
 from src.users.models import UserModel
 from src.cart.models import CartModel
+from src.orders.models import OrderModel, OrderItem, OrderStatus
 
 config.set_main_option("sqlalchemy.url", settings.DATABASE_URL)
 
