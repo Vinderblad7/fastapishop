@@ -6,6 +6,7 @@ from src.orders.schemas import OrderCreateSchema, OrderResponseSchema
 from src.orders.models import OrderModel, OrderStatus, OrderItem
 from src.cart.models import CartModel
 
+
 orders_router = APIRouter(prefix="/orders", tags=["Orders"])
 
 @orders_router.post("", response_model=OrderResponseSchema, status_code=status.HTTP_201_CREATED)
@@ -52,9 +53,16 @@ async def create_order(data: OrderCreateSchema, session: SessionDep, current_use
 
     await session.commit()
     
-    await session.refresh(new_order)
-    
-    return new_order
+    query = await session.execute(
+        select(OrderModel)
+        .where(OrderModel.id == new_order.id)
+        .options(
+            selectinload(OrderModel.items).selectinload(OrderItem.product)
+        )
+    )
+    fresh_order = query.scalar_one()
+
+    return fresh_order
 
 @orders_router.get("", response_model=list[OrderResponseSchema])
 async def get_orders_history(session: SessionDep, current_user: CurrentUserDep):
