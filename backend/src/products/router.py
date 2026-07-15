@@ -1,7 +1,8 @@
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, HTTPException, status, Depends
 from sqlalchemy import select
 from src.dependencies import SessionDep
-from src.products.schemas import ProductCreateSchema, ProductResponseSchema, ProductUpdateSchema
+from src.products.schemas import ProductCreateSchema, ProductResponseSchema, ProductUpdateSchema, ProductFilterSchema
+from src.products.filters import apply_product_filters
 from src.products.models import ProductModel
 
 products_router = APIRouter(prefix="/products", tags=["Products"])
@@ -20,11 +21,11 @@ async def create_product(data: ProductCreateSchema, session: SessionDep):
     await session.refresh(product)
     return product
 
-@products_router.get("", response_model=list[ProductResponseSchema])
-async def get_all(session: SessionDep):
-    query = await session.execute(select(ProductModel))
-    products = query.scalars().all()
-    return products
+# @products_router.get("", response_model=list[ProductResponseSchema])
+# async def get_all(session: SessionDep):
+#     query = await session.execute(select(ProductModel))
+#     products = query.scalars().all()
+#     return products
 
 @products_router.get("/{product_id}", response_model=ProductResponseSchema)
 async def get_by_id(product_id: int, session: SessionDep):
@@ -67,3 +68,17 @@ async def patch_by_id(product_id: int, data: ProductUpdateSchema, session: Sessi
     await session.refresh(product)
     
     return product
+
+@products_router.get("", response_model=list[ProductResponseSchema])
+async def get_products(
+    session: SessionDep,
+    filters: ProductFilterSchema = Depends()
+):
+    query = select(ProductModel)
+        
+    query = apply_product_filters(query, filters)
+        
+    result = await session.execute(query)
+    products = result.scalars().all()
+    
+    return products

@@ -27,3 +27,9 @@ class ProductUpdateSchema(BaseModel):
     price: float | None = Field(None, gt=0, description="New price")
     category_id: int | None = Field(None, description="New category ID")
     image_url: str | None = Field(None, description="New URL or path to the product image")
+
+class ProductFilterSchema(BaseModel):
+    search: str | None = Field(None, description="Search by name or description")
+    min_price: float | None = Field(None, description="Min price")
+    max_price: float | None = Field(None, description="Max price")
+    category_id: int | None = Field(None, description="Category ID")
