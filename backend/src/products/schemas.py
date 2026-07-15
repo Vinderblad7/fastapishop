@@ -33,3 +33,7 @@ class ProductFilterSchema(BaseModel):
     min_price: float | None = Field(None, description="Min price")
     max_price: float | None = Field(None, description="Max price")
     category_id: int | None = Field(None, description="Category ID")
+
+class PaginationSchema(BaseModel):
+    page: int = Field(default=1, ge=1, description="Page number")
+    limit: int = Field(default=10, ge=1, le=100, description="Products per page")

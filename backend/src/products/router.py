@@ -4,6 +4,7 @@ from src.dependencies import SessionDep
 from src.products.schemas import ProductCreateSchema, ProductResponseSchema, ProductUpdateSchema, ProductFilterSchema
 from src.products.filters import apply_product_filters
 from src.products.models import ProductModel
+from src.products.schemas import PaginationSchema
 
 products_router = APIRouter(prefix="/products", tags=["Products"])
 
@@ -72,12 +73,17 @@ async def patch_by_id(product_id: int, data: ProductUpdateSchema, session: Sessi
 @products_router.get("", response_model=list[ProductResponseSchema])
 async def get_products(
     session: SessionDep,
-    filters: ProductFilterSchema = Depends()
+    filters: ProductFilterSchema = Depends(),
+    pagination: PaginationSchema = Depends()
 ):
     query = select(ProductModel)
-        
+    
     query = apply_product_filters(query, filters)
-        
+    
+    offset = (pagination.page - 1) * pagination.limit
+    
+    query = query.limit(pagination.limit).offset(offset)
+    
     result = await session.execute(query)
     products = result.scalars().all()
     
