@@ -18,6 +18,9 @@ class OrderModel(Base):
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"))
     status: Mapped[OrderStatus] = mapped_column(default=OrderStatus.PENDING)
     total_price: Mapped[int] = mapped_column(default=0)
+    email: Mapped[str] = mapped_column(Text)
+    phone_number: Mapped[str] = mapped_column(Text)
+    address: Mapped[str] = mapped_column(Text)
 
     created_at: Mapped[datetime.datetime] = mapped_column(DateTime, server_default=func.now())
     updated_at: Mapped[datetime.datetime] = mapped_column(DateTime, server_default=func.now(), onupdate=func.now())
