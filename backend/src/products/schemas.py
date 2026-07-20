@@ -37,3 +37,9 @@ class ProductFilterSchema(BaseModel):
 class PaginationSchema(BaseModel):
     page: int = Field(default=1, ge=1, description="Page number")
     limit: int = Field(default=10, ge=1, le=100, description="Products per page")
+
+class PaginatedProductsResponseSchema(BaseModel):
+    items: list[ProductResponseSchema]
+    total: int
+    page: int
+    limit: int

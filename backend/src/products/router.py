@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, status, Depends
-from sqlalchemy import select
+from sqlalchemy import select, func
 from src.dependencies import SessionDep
-from src.products.schemas import ProductCreateSchema, ProductResponseSchema, ProductUpdateSchema, ProductFilterSchema
+from src.products.schemas import ProductCreateSchema, ProductResponseSchema, ProductUpdateSchema, ProductFilterSchema, PaginatedProductsResponseSchema
 from src.products.filters import apply_product_filters
 from src.products.models import ProductModel
 from src.products.schemas import PaginationSchema
@@ -70,7 +70,7 @@ async def patch_by_id(product_id: int, data: ProductUpdateSchema, session: Sessi
     
     return product
 
-@products_router.get("", response_model=list[ProductResponseSchema])
+@products_router.get("", response_model=PaginatedProductsResponseSchema)
 async def get_products(
     session: SessionDep,
     filters: ProductFilterSchema = Depends(),
@@ -80,11 +80,19 @@ async def get_products(
     
     query = apply_product_filters(query, filters)
     
+    count_query = select(func.count()).select_from(query.subquery())
+    total_result = await session.execute(count_query)
+    total = total_result.scalar_one()
+    
     offset = (pagination.page - 1) * pagination.limit
+    paginated_query = query.limit(pagination.limit).offset(offset)
     
-    query = query.limit(pagination.limit).offset(offset)
-    
-    result = await session.execute(query)
+    result = await session.execute(paginated_query)
     products = result.scalars().all()
     
-    return products
+    return {
+        "items": products,
+        "total": total,
+        "page": pagination.page,
+        "limit": pagination.limit
+    }
