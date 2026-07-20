@@ -6,35 +6,65 @@
         <p class="text-gray-500">Откройте для себя наши лучшие предложения</p>
       </div>
 
-      <!-- Фильтр Категорий -->
-      <div v-if="productsStore.categories.length > 0" class="mb-8 flex flex-wrap gap-2 items-center">
-        <!-- Кнопка Все -->
-        <button
-          @click="productsStore.clearCategoryFilter()"
-          :class="[
-            'px-4 py-2 text-sm font-bold border-2 border-black transition-all',
-            !productsStore.selectedCategory
-              ? 'bg-black text-white shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]'
-              : 'bg-white text-black hover:bg-gray-100'
-          ]"
-        >
-          Все
-        </button>
+      <div class="mb-8 flex flex-col gap-4">
+        <div class="flex flex-col md:flex-row gap-4 justify-between items-center">
+          <div class="w-full md:w-96">
+            <input
+              v-model="searchInput"
+              @input="onSearchInput"
+              type="text"
+              placeholder="Поиск по названию..."
+              class="w-full px-4 py-2 border-2 border-black font-medium focus:outline-none shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]"
+            />
+          </div>
 
-        <!-- Кнопки Категорий -->
-        <button
-          v-for="category in productsStore.categories"
-          :key="category.id"
-          @click="productsStore.setCategory(category.id)"
-          :class="[
-            'px-4 py-2 text-sm font-bold border-2 border-black transition-all',
-            productsStore.selectedCategory === category.id
-              ? 'bg-black text-white shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]'
-              : 'bg-white text-black hover:bg-gray-100'
-          ]"
-        >
-          {{ category.name }}
-        </button>
+          <div v-if="productsStore.categories.length > 0" class="flex flex-wrap gap-2 items-center w-full md:w-auto">
+            <button
+              @click="productsStore.clearCategoryFilter()"
+              :class="[
+                'px-4 py-2 text-sm font-bold border-2 border-black transition-all',
+                !productsStore.selectedCategory
+                  ? 'bg-black text-white shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]'
+                  : 'bg-white text-black hover:bg-gray-100'
+              ]"
+            >
+              Все
+            </button>
+
+            <button
+              v-for="category in productsStore.categories"
+              :key="category.id"
+              @click="productsStore.setCategory(category.id)"
+              :class="[
+                'px-4 py-2 text-sm font-bold border-2 border-black transition-all',
+                productsStore.selectedCategory === category.id
+                  ? 'bg-black text-white shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]'
+                  : 'bg-white text-black hover:bg-gray-100'
+              ]"
+            >
+              {{ category.name }}
+            </button>
+          </div>
+        </div>
+
+        <div class="flex flex-wrap gap-2 items-center">
+          <span class="text-sm font-bold">Цена:</span>
+          <input
+            v-model="minPriceInput"
+            @input="onPriceInput"
+            type="number"
+            placeholder="От"
+            class="w-24 px-3 py-1 text-sm border-2 border-black font-medium focus:outline-none shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]"
+          />
+          <span class="text-sm font-bold">—</span>
+          <input
+            v-model="maxPriceInput"
+            @input="onPriceInput"
+            type="number"
+            placeholder="До"
+            class="w-24 px-3 py-1 text-sm border-2 border-black font-medium focus:outline-none shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]"
+          />
+        </div>
       </div>
 
       <main class="w-full">
@@ -44,18 +74,15 @@
           </p>
         </div>
 
-        <!-- Состояние загрузки -->
         <div v-if="productsStore.loading" class="text-center py-12">
           <div class="inline-block animate-spin rounded-none h-12 w-12 border-b-2 border-black"></div>
           <p class="mt-4 text-gray-500">Загрузка товаров...</p>
         </div>
 
-        <!-- Ошибка -->
         <div v-else-if="productsStore.error" class="text-center py-12">
           <p class="text-red-600 font-medium">{{ productsStore.error }}</p>
         </div>
 
-        <!-- Отображение товаров -->
         <div v-else-if="productsStore.products && productsStore.products.length > 0">
           <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mb-8">
             <ProductCard
@@ -65,12 +92,10 @@
             />
           </div>
 
-          <!-- Блок Пагинации -->
           <div 
             v-if="totalPages > 1"
             class="flex justify-center items-center gap-2 border-t border-gray-100 pt-8 mt-12"
           >
-            <!-- Кнопка Назад -->
             <button
               :disabled="productsStore.currentPage === 1"
               @click="productsStore.setPage(productsStore.currentPage - 1)"
@@ -79,7 +104,6 @@
               ←
             </button>
 
-            <!-- Кнопки с номерами страниц -->
             <button
               v-for="page in totalPages"
               :key="page"
@@ -94,7 +118,6 @@
               {{ page }}
             </button>
 
-            <!-- Кнопка Вперед -->
             <button
               :disabled="productsStore.currentPage === totalPages"
               @click="productsStore.setPage(productsStore.currentPage + 1)"
@@ -105,7 +128,6 @@
           </div>
         </div>
 
-        <!-- Пустой список -->
         <div v-else class="text-center py-12">
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -129,19 +151,36 @@
 </template>
 
 <script setup>
-import { computed, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useProductsStore } from '@/stores/products'
 import ProductCard from '@/components/ProductCard.vue'
 
 const productsStore = useProductsStore()
+const searchInput = ref(productsStore.searchQuery)
+const minPriceInput = ref(productsStore.minPrice)
+const maxPriceInput = ref(productsStore.maxPrice)
 
-// Вычисляем общее количество страниц
+let searchTimeout = null
+const onSearchInput = () => {
+  clearTimeout(searchTimeout)
+  searchTimeout = setTimeout(() => {
+    productsStore.setSearchQuery(searchInput.value)
+  }, 350)
+}
+
+let priceTimeout = null
+const onPriceInput = () => {
+  clearTimeout(priceTimeout)
+  priceTimeout = setTimeout(() => {
+    productsStore.setPriceRange(minPriceInput.value, maxPriceInput.value)
+  }, 400)
+}
+
 const totalPages = computed(() => {
   return Math.ceil(productsStore.totalProducts / productsStore.itemsPerPage) || 1
 })
 
 onMounted(async () => {
-  // Загружаем категории параллельно с товарами
   await Promise.all([
     productsStore.fetchCategories(),
     productsStore.fetchProducts()

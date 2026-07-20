@@ -11,24 +11,24 @@ const apiClient = axios.create({
 })
 
 export const productsAPI = {
-  getAll(page = 1, limit = 10) {
-    return apiClient.get('/products', {
-      params: { page, limit }
-    })
+  getAll(page = 1, limit = 10, search = '', minPrice = null, maxPrice = null) {
+    const params = { page, limit }
+    if (search) params.search = search
+    if (minPrice !== null && minPrice !== '') params.min_price = minPrice
+    if (maxPrice !== null && maxPrice !== '') params.max_price = maxPrice
+    return apiClient.get('/products', { params })
   },
 
   getById(id) {
     return apiClient.get(`/products/${id}`)
   },
 
-  getByCategory(categoryId, page = 1, limit = 10) {
-    return apiClient.get('/products', {
-      params: { 
-        category_id: categoryId, 
-        page, 
-        limit 
-      }
-    })
+  getByCategory(categoryId, page = 1, limit = 10, search = '', minPrice = null, maxPrice = null) {
+    const params = { category_id: categoryId, page, limit }
+    if (search) params.search = search
+    if (minPrice !== null && minPrice !== '') params.min_price = minPrice
+    if (maxPrice !== null && maxPrice !== '') params.max_price = maxPrice
+    return apiClient.get('/products', { params })
   },
 }
 

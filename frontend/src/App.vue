@@ -10,15 +10,16 @@
       </div>
     </footer>
 
-    <!-- Добавляем модальное окно авторизации сюда -->
     <AuthModal />
+    <ToastContainer />
   </div>
 </template>
 
 <script setup>
 import { RouterView } from 'vue-router'
 import Header from '@/components/Header.vue'
-import AuthModal from '@/components/AuthModal.vue' // <-- Импортируем модалку
+import AuthModal from '@/components/AuthModal.vue'
+import ToastContainer from '@/components/ToastContainer.vue'
 import { onMounted } from 'vue'
 import { useCartStore } from '@/stores/cart'
 

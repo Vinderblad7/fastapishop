@@ -6,6 +6,9 @@ export const useProductsStore = defineStore('products', () => {
   const products = ref([])
   const categories = ref([])
   const selectedCategory = ref(null)
+  const searchQuery = ref('')
+  const minPrice = ref(null)
+  const maxPrice = ref(null)
   const loading = ref(false)
   const error = ref(null)
 
@@ -20,10 +23,24 @@ export const useProductsStore = defineStore('products', () => {
     error.value = null
     try {
       let response
+      
       if (selectedCategory.value) {
-        response = await productsAPI.getByCategory(selectedCategory.value, currentPage.value, itemsPerPage.value)
+        response = await productsAPI.getByCategory(
+          selectedCategory.value, 
+          currentPage.value, 
+          itemsPerPage.value,
+          searchQuery.value,
+          minPrice.value,
+          maxPrice.value
+        )
       } else {
-        response = await productsAPI.getAll(currentPage.value, itemsPerPage.value)
+        response = await productsAPI.getAll(
+          currentPage.value, 
+          itemsPerPage.value,
+          searchQuery.value,
+          minPrice.value,
+          maxPrice.value
+        )
       }
       
       if (response.data && Array.isArray(response.data.items)) {
@@ -70,6 +87,19 @@ export const useProductsStore = defineStore('products', () => {
     }
   }
 
+  function setSearchQuery(query) {
+    searchQuery.value = query
+    currentPage.value = 1
+    fetchProducts()
+  }
+
+  function setPriceRange(min, max) {
+    minPrice.value = min
+    maxPrice.value = max
+    currentPage.value = 1
+    fetchProducts()
+  }
+
   function setCategory(categoryId) {
     selectedCategory.value = categoryId
     currentPage.value = 1 
@@ -91,6 +121,9 @@ export const useProductsStore = defineStore('products', () => {
     products,
     categories,
     selectedCategory,
+    searchQuery,
+    minPrice,
+    maxPrice,
     loading,
     error,
     currentPage,
@@ -100,6 +133,8 @@ export const useProductsStore = defineStore('products', () => {
     fetchProducts,
     fetchProductById,
     fetchCategories,
+    setSearchQuery,
+    setPriceRange,
     setCategory,
     clearCategoryFilter,
     setPage,

@@ -17,3 +17,10 @@ __pycache__/
 
 *.log
 /static/
+/static/uploads
+static/
+**/static/
+*.jpg
+*.jpeg
+*.png
+*.webp
