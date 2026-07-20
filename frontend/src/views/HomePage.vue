@@ -6,6 +6,37 @@
         <p class="text-gray-500">Откройте для себя наши лучшие предложения</p>
       </div>
 
+      <!-- Фильтр Категорий -->
+      <div v-if="productsStore.categories.length > 0" class="mb-8 flex flex-wrap gap-2 items-center">
+        <!-- Кнопка Все -->
+        <button
+          @click="productsStore.clearCategoryFilter()"
+          :class="[
+            'px-4 py-2 text-sm font-bold border-2 border-black transition-all',
+            !productsStore.selectedCategory
+              ? 'bg-black text-white shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]'
+              : 'bg-white text-black hover:bg-gray-100'
+          ]"
+        >
+          Все
+        </button>
+
+        <!-- Кнопки Категорий -->
+        <button
+          v-for="category in productsStore.categories"
+          :key="category.id"
+          @click="productsStore.setCategory(category.id)"
+          :class="[
+            'px-4 py-2 text-sm font-bold border-2 border-black transition-all',
+            productsStore.selectedCategory === category.id
+              ? 'bg-black text-white shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]'
+              : 'bg-white text-black hover:bg-gray-100'
+          ]"
+        >
+          {{ category.name }}
+        </button>
+      </div>
+
       <main class="w-full">
         <div class="mb-6 flex items-center justify-between">
           <p class="text-gray-700">
@@ -110,6 +141,10 @@ const totalPages = computed(() => {
 })
 
 onMounted(async () => {
-  await productsStore.fetchProducts()
+  // Загружаем категории параллельно с товарами
+  await Promise.all([
+    productsStore.fetchCategories(),
+    productsStore.fetchProducts()
+  ])
 })
 </script>
