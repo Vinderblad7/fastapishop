@@ -1,16 +1,17 @@
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, HTTPException, status, BackgroundTasks
 from sqlalchemy import select, delete
 from sqlalchemy.orm import selectinload
 from src.dependencies import SessionDep, CurrentUserDep
 from src.orders.schemas import OrderCreateSchema, OrderResponseSchema
 from src.orders.models import OrderModel, OrderStatus, OrderItem
 from src.cart.models import CartModel
+from src.services.email import send_order_email
 
 
 orders_router = APIRouter(prefix="/orders", tags=["Orders"])
 
 @orders_router.post("", response_model=OrderResponseSchema, status_code=status.HTTP_201_CREATED)
-async def create_order(data: OrderCreateSchema, session: SessionDep, current_user: CurrentUserDep):
+async def create_order(data: OrderCreateSchema, session: SessionDep, current_user: CurrentUserDep, background_tasks: BackgroundTasks):
     query = await session.execute(
         select(CartModel).where(CartModel.user_id == current_user.id)
     )
@@ -61,6 +62,13 @@ async def create_order(data: OrderCreateSchema, session: SessionDep, current_use
         )
     )
     fresh_order = query.scalar_one()
+
+    background_tasks.add_task(
+        send_order_email, 
+        to_email=fresh_order.email, 
+        order_id=fresh_order.id, 
+        total_price=fresh_order.total_price
+    )
 
     return fresh_order
 
