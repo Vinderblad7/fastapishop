@@ -1,6 +1,6 @@
 from sqlalchemy import or_, select
 from src.products.models import ProductModel
-from src.products.schemas import ProductFilterSchema
+from src.products.schemas import ProductFilterSchema, PaginationSchema
 
 def apply_product_filters(query, filters: ProductFilterSchema):
     if filters.search:
@@ -21,3 +21,10 @@ def apply_product_filters(query, filters: ProductFilterSchema):
         query = query.where(ProductModel.category_id == filters.category_id)
         
     return query
+
+def get_filter_cache_key(filters: ProductFilterSchema, pagination: PaginationSchema) -> str:
+    filter_dict = filters.model_dump(exclude_unset=True)
+    pagination_dict = pagination.model_dump()
+    combined_dict = {**filter_dict, **pagination_dict}
+    parts = [f"{k}={v}" for k, v in sorted(combined_dict.items())]
+    return f"products:cache:{':'.join(parts)}"

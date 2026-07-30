@@ -2,6 +2,10 @@ from src.database import Base
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy import Text, DateTime, func, ForeignKey
 import datetime
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from src.categories.models import CategoryModel
 
 class ProductModel(Base):
     __tablename__ = "products"

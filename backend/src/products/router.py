@@ -5,6 +5,10 @@ from src.products.schemas import ProductCreateSchema, ProductResponseSchema, Pro
 from src.products.filters import apply_product_filters
 from src.products.models import ProductModel
 from src.products.schemas import PaginationSchema
+from src.database import get_redis
+from redis.asyncio import Redis
+from src.products.filters import get_filter_cache_key
+import json
 
 products_router = APIRouter(prefix="/products", tags=["Products"])
 
@@ -74,10 +78,16 @@ async def patch_by_id(product_id: int, data: ProductUpdateSchema, session: Sessi
 async def get_products(
     session: SessionDep,
     filters: ProductFilterSchema = Depends(),
-    pagination: PaginationSchema = Depends()
+    pagination: PaginationSchema = Depends(),
+    redis: Redis = Depends(get_redis)
 ):
+    cache_key = get_filter_cache_key(filters, pagination)
+
+    cached_data = await redis.get(cache_key)
+    if cached_data:
+        return json.loads(cached_data)
+        
     query = select(ProductModel)
-    
     query = apply_product_filters(query, filters)
     
     count_query = select(func.count()).select_from(query.subquery())
@@ -89,10 +99,28 @@ async def get_products(
     
     result = await session.execute(paginated_query)
     products = result.scalars().all()
-    
-    return {
-        "items": products,
+
+    products_data = [
+        {
+            "id": product.id,
+            "name": product.name,
+            "description": product.description,
+            "price": product.price,
+            "created_at": product.created_at.isoformat(),
+            "updated_at": product.updated_at.isoformat(),
+            "category_id": product.category_id,
+            "image_url": product.image_url,
+        }
+        for product in products
+    ]
+
+    response_payload = {
+        "items": products_data,
         "total": total,
         "page": pagination.page,
         "limit": pagination.limit
     }
+
+    await redis.set(cache_key, json.dumps(response_payload), ex=60)
+
+    return response_payload
