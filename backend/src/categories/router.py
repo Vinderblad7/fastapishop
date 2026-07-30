@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, status 
+from fastapi import APIRouter, HTTPException, status, Depends
 from sqlalchemy import select
 from slugify import slugify
 from src.dependencies import SessionDep
@@ -6,10 +6,14 @@ from src.dependencies import SessionDep
 from src.categories.schemas import CategoryCreateSchema, CategoryResponseSchema, CategoryUpdateSchema
 from src.categories.models import CategoryModel
 
+from src.database import get_redis
+from redis.asyncio import Redis
+import json
+
 categories_router = APIRouter(prefix="/categories", tags=["Categories"])
 
 @categories_router.post("", response_model=CategoryResponseSchema, status_code=status.HTTP_201_CREATED)
-async def create_category(data: CategoryCreateSchema, session: SessionDep):
+async def create_category(data: CategoryCreateSchema, session: SessionDep, redis: Redis = Depends(get_redis)):
     category_slug = slugify(data.name)
     
     query = await session.execute(
@@ -30,14 +34,30 @@ async def create_category(data: CategoryCreateSchema, session: SessionDep):
     session.add(category)
     await session.commit()
     await session.refresh(category)
+
+    await redis.delete("categories_cache")
     
     return category
 
 @categories_router.get("", response_model=list[CategoryResponseSchema])
-async def get_all(session: SessionDep):
+async def get_all(session: SessionDep, redis: Redis = Depends(get_redis)):
+
+    cached_categories = await redis.get("categories_cache")
+
+    if cached_categories:
+        return json.loads(cached_categories)   
+
     query = await session.execute(select(CategoryModel))
     categories = query.scalars().all()
-    return categories
+
+    categories_data = [
+        {"id": category.id, "name": category.name, "slug": category.slug}
+        for category in categories 
+    ]
+
+    await redis.set("categories_cache", json.dumps(categories_data), ex=300)
+
+    return categories_data
 
 @categories_router.get("/{category_id}", response_model=CategoryResponseSchema)
 async def get_by_id(category_id: int, session: SessionDep):
@@ -50,7 +70,7 @@ async def get_by_id(category_id: int, session: SessionDep):
     return category
 
 @categories_router.delete("/{category_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def delete(category_id: int, session: SessionDep):
+async def delete(category_id: int, session: SessionDep, redis: Redis = Depends(get_redis)):
     query = await session.execute(select(CategoryModel).where(CategoryModel.id == category_id))
     category = query.scalar_one_or_none()
     if not category:
@@ -60,8 +80,10 @@ async def delete(category_id: int, session: SessionDep):
     await session.delete(category)
     await session.commit()
 
+    await redis.delete("categories_cache")
+
 @categories_router.patch("/{category_id}", response_model=CategoryResponseSchema)
-async def patch_by_id(category_id: int, data: CategoryUpdateSchema, session: SessionDep):
+async def patch_by_id(category_id: int, data: CategoryUpdateSchema, session: SessionDep, redis: Redis = Depends(get_redis)):
     query = await session.execute(select(CategoryModel).where(CategoryModel.id == category_id))
     category = query.scalar_one_or_none()
     if not category:
@@ -81,5 +103,7 @@ async def patch_by_id(category_id: int, data: CategoryUpdateSchema, session: Ses
     session.add(category)
     await session.commit()
     await session.refresh(category)
+
+    await redis.delete("categories_cache")
     
     return category

@@ -1,5 +1,9 @@
+from typing import TYPE_CHECKING
 from src.database import Base
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+
+if TYPE_CHECKING:
+    from src.products.models import ProductModel
 
 class CategoryModel(Base):
     __tablename__ = "categories"
