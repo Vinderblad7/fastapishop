@@ -27,4 +27,4 @@ def get_filter_cache_key(filters: ProductFilterSchema, pagination: PaginationSch
     pagination_dict = pagination.model_dump()
     combined_dict = {**filter_dict, **pagination_dict}
     parts = [f"{k}={v}" for k, v in sorted(combined_dict.items())]
-    return f"products:cache:{':'.join(parts)}"
+    return f"products:cache:{':'.join(parts)}"  
