@@ -66,8 +66,6 @@ async def get_my_cart(
     if cached_cart:
         return json.loads(cached_cart)
 
-    print("--> [DEBUG] Cache MISS! Querying DB...")
-
     query = await session.execute(
         select(CartModel)
         .options(joinedload(CartModel.products))

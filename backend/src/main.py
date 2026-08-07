@@ -1,4 +1,5 @@
 from contextlib import asynccontextmanager
+import logging
 import os
 
 from fastapi import FastAPI
@@ -11,14 +12,16 @@ from src.core.redis import redis_client
 from src.database import engine
 from src.main_router import main_router
 
+logger = logging.getLogger("uvicorn")
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     try:
         await redis_client.ping()
-        print(" Connected to Redis successfully!")
+        logger.info("Connected to Redis successfully!")
     except Exception as e:
-        print(f" Redis connection error: {e}")
+        logger.error(f"Redis connection error: {e}")
 
     yield
 
@@ -30,6 +33,8 @@ app = FastAPI(lifespan=lifespan)
 origins = [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
+    "http://localhost",
+    "http://127.0.0.1",
 ]
 
 app.add_middleware(
