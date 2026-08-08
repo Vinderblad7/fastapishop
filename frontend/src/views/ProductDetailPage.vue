@@ -1,105 +1,50 @@
 <template>
-  <div class="min-h-screen bg-white">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      <button
-        @click="router.push('/')"
-        class="flex items-center text-gray-600 hover:text-black transition-colors mb-8 font-medium text-lg"
-      >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          class="h-6 w-6 mr-2"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M15 19l-7-7 7-7"
-          />
-        </svg>
-        Назад в каталог
-      </button>
+  <div class="min-h-screen bg-white py-12 px-4 max-w-7xl mx-auto">
+    <router-link
+      to="/"
+      class="inline-block mb-6 font-bold border-2 border-black px-4 py-2 hover:bg-black hover:text-white transition-colors cursor-pointer"
+    >
+      ← Назад к каталогу
+    </router-link>
 
-      <div v-if="loading" class="text-center py-16">
-        <div class="inline-block animate-spin rounded-full h-14 w-14 border-b-4 border-black"></div>
-        <p class="mt-4 text-lg text-gray-500">Загрузка товара...</p>
+    <div v-if="loading" class="text-center py-24">
+      <div class="inline-block animate-spin h-12 w-12 border-b-2 border-black"></div>
+      <p class="mt-4 text-gray-500 font-medium">Загрузка товара...</p>
+    </div>
+
+    <div v-else-if="error" class="text-center py-24 text-red-600 font-bold">
+      {{ error }}
+    </div>
+
+    <div v-else-if="product" class="grid grid-cols-1 md:grid-cols-2 gap-12 items-start">
+      <div class="border-2 border-black p-2 bg-gray-50 aspect-square overflow-hidden">
+        <img
+          :src="productImage"
+          :alt="product.name"
+          class="w-full h-full object-cover"
+          @error="handleImageError"
+        />
       </div>
 
-      <div v-else-if="error" class="text-center py-16">
-        <p class="text-red-600 text-lg font-medium">{{ error }}</p>
+      <div>
+        <h1 class="text-4xl font-black text-black mb-4">{{ product.name }}</h1>
+        <p class="text-3xl font-extrabold text-black mb-6">{{ product.price?.toFixed(2) }} руб.</p>
+        
+        <div class="mb-8 text-gray-700">
+          <h3 class="font-bold text-black mb-2">Описание:</h3>
+          <p class="leading-relaxed">{{ product.description || 'Описание отсутствует' }}</p>
+        </div>
+
         <button
-          @click="router.push('/')"
-          class="mt-6 bg-black text-white py-3 px-8 text-lg font-semibold rounded-none hover:bg-gray-900 transition-colors"
+          @click="addToCart"
+          :disabled="adding"
+          class="w-full bg-black text-white py-4 font-bold hover:bg-gray-900 transition-colors disabled:opacity-50 cursor-pointer shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]"
         >
-          Вернуться в каталог
+          {{ adding ? 'Добавление...' : 'Добавить в корзину' }}
         </button>
-      </div>
 
-      <div
-        v-else-if="product"
-        class="bg-white border-2 border-gray-100 rounded-none shadow-sm overflow-hidden"
-      >
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 p-8">
-          <div class="aspect-square overflow-hidden rounded-none bg-gray-50">
-            <img
-              :src="product.image_url ? `http://localhost:8000${product.image_url}` : 'https://placehold.co/600x600?text=No+Image'"
-              :alt="product.name"
-              class="w-full h-full object-cover"
-              @error="handleImageError"
-            />
-          </div>
-
-          <div class="flex flex-col">
-            <div 
-              v-if="product.category" 
-              class="text-sm text-gray-500 uppercase tracking-wider mb-3 font-medium"
-            >
-              {{ typeof product.category === 'object' ? product.category.name : product.category }}
-            </div>
-
-            <h1 class="text-3xl sm:text-4xl font-extrabold text-black mb-4">
-              {{ product.name }}
-            </h1>
-
-            <div class="text-2xl sm:text-3xl font-bold text-black mb-6">
-              {{ product.price.toFixed(2) }} руб.
-            </div>
-
-            <div class="mb-8">
-              <h2 class="text-xl font-bold text-black mb-3">Описание</h2>
-              <p class="text-gray-600 leading-relaxed">
-                {{ product.description || 'Описание отсутствует.' }}
-              </p>
-            </div>
-
-            <div class="mt-auto">
-              <button
-                @click="handleAddToCart"
-                :disabled="adding"
-                class="w-full bg-black text-white py-4 px-6 text-lg font-semibold rounded-none hover:bg-gray-900 transition-colors disabled:opacity-50 disabled:cursor-not-allowed border-2 border-black"
-              >
-                {{ adding ? 'Добавление...' : 'Добавить в корзину' }}
-              </button>
-
-              <transition name="fade">
-                <div
-                  v-if="showNotification"
-                  class="mt-4 bg-black text-white px-4 py-3 rounded-none text-center font-medium"
-                >
-                  ✓ Товар добавлен в корзину!
-                </div>
-              </transition>
-            </div>
-
-            <div class="mt-8 pt-6 border-t-2 border-gray-100">
-              <p class="text-sm text-gray-500">ID товара: {{ product.id }}</p>
-              <p v-if="product.created_at" class="text-sm text-gray-500">
-                Добавлен: {{ formatDate(product.created_at) }}
-              </p>
-            </div>
-          </div>
+        <div v-if="showNotification" class="mt-4 text-center font-bold text-green-600">
+          ✓ Товар успешно добавлен в корзину!
         </div>
       </div>
     </div>
@@ -107,79 +52,53 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
-import { useProductsStore } from '@/stores/products'
+import { ref, computed, onMounted } from 'vue'
+import { useRoute } from 'vue-router'
 import { useCartStore } from '@/stores/cart'
+import axios from 'axios'
 
 const route = useRoute()
-const router = useRouter()
-const productsStore = useProductsStore()
 const cartStore = useCartStore()
 
 const product = ref(null)
-const loading = ref(false)
+const loading = ref(true)
 const error = ref(null)
 const adding = ref(false)
 const showNotification = ref(false)
 
-async function loadProduct() {
-  loading.value = true
-  error.value = null
-
-  try {
-    const productId = parseInt(route.params.id)
-    product.value = await productsStore.fetchProductById(productId)
-  } catch (err) {
-    error.value = 'Товар не найден'
-    console.error('Error loading product:', err)
-  } finally {
-    loading.value = false
-  }
-}
-
-async function handleAddToCart() {
-  adding.value = true
-  
-  // Вся проверка авторизации и открытие единой красивой модалки — внутри cartStore
-  const success = await cartStore.addToCart(product.value.id, 1)
-
-  if (success) {
-    showNotification.value = true
-    setTimeout(() => {
-      showNotification.value = false
-    }, 3000)
-  }
-
-  adding.value = false
-}
-
-function formatDate(dateString) {
-  const date = new Date(dateString)
-  return date.toLocaleDateString('ru-RU', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  })
-}
+const productImage = computed(() => {
+  const rawUrl = product.value?.image_url || product.value?.image || ''
+  if (!rawUrl) return 'https://placehold.co/600x600?text=No+Image'
+  return rawUrl.replace('http://localhost:8000', '').replace('http://127.0.0.1:8000', '')
+})
 
 function handleImageError(event) {
   event.target.src = 'https://placehold.co/600x600?text=No+Image'
 }
 
-onMounted(() => {
-  loadProduct()
+onMounted(async () => {
+  try {
+    const productId = route.params.id
+    const response = await axios.get(`/api/products/${productId}`)
+    product.value = response.data
+  } catch (err) {
+    error.value = 'Не удалось загрузить товар. Возможно, он был удален.'
+  } finally {
+    loading.value = false
+  }
 })
+
+async function addToCart() {
+  if (!product.value) return
+  adding.value = true
+  const success = await cartStore.addToCart(product.value.id, 1)
+
+  if (success !== false) {
+    showNotification.value = true
+    setTimeout(() => {
+      showNotification.value = false
+    }, 2000)
+  }
+  adding.value = false
+}
 </script>
-
-<style scoped>
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity 0.3s;
-}
-
-.fade-enter-from,
-.fade-leave-to {
-  opacity: 0;
-}
-</style>

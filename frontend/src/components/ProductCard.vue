@@ -1,32 +1,28 @@
 <template>
-  <div
-    class="bg-white border-2 border-gray-100 rounded-none overflow-hidden hover:border-black transition-all duration-300"
+  <router-link
+    :to="{ name: 'product-detail', params: { id: Number(product.id) } }"
+    class="block bg-white border-2 border-gray-100 rounded-none overflow-hidden hover:border-black transition-all duration-300 cursor-pointer"
   >
-    <router-link :to="`/product/${product.id}`">
-      <div class="aspect-square overflow-hidden bg-gray-50">
-        <!-- Исправлено: склеиваем путь с бэкендом, если есть картинка -->
-        <img
-          :src="product.image_url ? `http://localhost:8000${product.image_url}` : 'https://placehold.co/400x400?text=No+Image'"
-          :alt="product.name"
-          class="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-          @error="handleImageError"
-        />
-      </div>
-    </router-link>
+    <div class="aspect-square overflow-hidden bg-gray-50">
+      <img
+        :src="productImage"
+        :alt="product.name"
+        class="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+        @error="handleImageError"
+      />
+    </div>
 
     <div class="p-4">
-      <router-link :to="`/product/${product.id}`">
-        <h3 class="text-lg font-bold text-black mb-2 hover:text-gray-700 transition-colors line-clamp-2 min-h-[3.5rem]">
-          {{ product.name }}
-        </h3>
-      </router-link>
+      <h3 class="text-lg font-bold text-black mb-2 hover:text-gray-700 transition-colors line-clamp-2 min-h-[3.5rem]">
+        {{ product.name }}
+      </h3>
 
       <p class="text-2xl font-black text-black mb-4">{{ product.price.toFixed(2) }} руб.</p>
 
       <button
-        @click="handleAddToCart"
+        @click.prevent.stop="handleAddToCart"
         :disabled="adding"
-        class="w-full bg-black text-white py-3 px-4 rounded-none hover:bg-gray-900 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-semibold"
+        class="w-full bg-black text-white py-3 px-4 rounded-none hover:bg-gray-900 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-semibold cursor-pointer"
       >
         {{ adding ? 'Добавление...' : 'В корзину' }}
       </button>
@@ -37,11 +33,11 @@
         </div>
       </transition>
     </div>
-  </div>
+  </router-link>
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { useCartStore } from '@/stores/cart'
 
 const props = defineProps({
@@ -54,6 +50,13 @@ const props = defineProps({
 const cartStore = useCartStore()
 const adding = ref(false)
 const showNotification = ref(false)
+
+const productImage = computed(() => {
+  if (!props.product.image_url) return 'https://placehold.co/400x400?text=No+Image'
+  return props.product.image_url
+    .replace('http://localhost:8000', '')
+    .replace('http://127.0.0.1:8000', '')
+})
 
 async function handleAddToCart() {
   adding.value = true

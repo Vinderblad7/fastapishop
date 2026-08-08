@@ -23,7 +23,7 @@
             <button
               @click="decreaseQuantity"
               :disabled="updating"
-              class="px-3 py-2 hover:bg-gray-100 transition-colors disabled:opacity-50"
+              class="px-3 py-2 hover:bg-gray-100 transition-colors disabled:opacity-50 cursor-pointer"
             >
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4" />
@@ -37,7 +37,7 @@
             <button
               @click="increaseQuantity"
               :disabled="updating"
-              class="px-3 py-2 hover:bg-gray-100 transition-colors disabled:opacity-50"
+              class="px-3 py-2 hover:bg-gray-100 transition-colors disabled:opacity-50 cursor-pointer"
             >
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
@@ -48,7 +48,7 @@
           <button
             @click="handleRemove"
             :disabled="updating"
-            class="text-red-600 hover:text-red-700 transition-colors disabled:opacity-50"
+            class="text-red-600 hover:text-red-700 transition-colors disabled:opacity-50 cursor-pointer"
           >
             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -79,12 +79,16 @@ const props = defineProps({
 
 const productData = computed(() => {
   const data = props.item.products || props.item.product || {}
-  const API_URL = 'http://localhost:8000' // Замени на свой адрес бэкенда, если другой
+  const rawUrl = data.image_url || data.image || ''
+  
+  const fixedUrl = rawUrl 
+    ? rawUrl.replace('http://localhost:8000', '').replace('http://127.0.0.1:8000', '') 
+    : ''
 
-  if (data.image_url && data.image_url.startsWith('/')) {
-    return { ...data, image_url: `${API_URL}${data.image_url}` }
+  return {
+    ...data,
+    image_url: fixedUrl
   }
-  return data
 })
 
 const cartStore = useCartStore()
@@ -112,7 +116,6 @@ async function handleRemove() {
   updating.value = false
 }
 
-// Защита от бесконечного цикла
 function handleImageError(event) {
   if (event.target.src.includes('via.placeholder.com')) return
   event.target.src = 'https://via.placeholder.com/100x100?text=No+Image'

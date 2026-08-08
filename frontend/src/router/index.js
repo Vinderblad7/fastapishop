@@ -3,7 +3,7 @@ import HomePage from '@/views/HomePage.vue'
 import ProductDetailPage from '@/views/ProductDetailPage.vue'
 import CartPage from '@/views/CartPage.vue'
 import LoginView from '@/views/LoginView.vue'
-import RegisterView from '@/views/RegisterView.vue' // <-- 1. Импортируем компонент
+import RegisterView from '@/views/RegisterView.vue'
 import CheckoutView from '@/views/CheckoutView.vue'
 
 const router = createRouter({

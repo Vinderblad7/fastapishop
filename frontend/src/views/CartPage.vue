@@ -13,12 +13,12 @@
       </div>
 
       <!-- Если пользователь не авторизован -->
-      <div v-else-if="!authStore.isAuthenticated" class="text-center py-16 max-w-md mx-auto border-2 border-black p-8">
+      <div v-else-if="!authStore.isAuthenticated" class="text-center py-16 max-w-md mx-auto border-2 border-black p-8 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]">
         <h2 class="text-2xl font-black text-black mb-3">Вы не вошли в аккаунт</h2>
         <p class="text-gray-600 mb-6 font-medium">Чтобы просмотреть и сохранить товары в корзине, авторизуйтесь в системе.</p>
         
         <div class="flex flex-col gap-3">
-          <router-link to="/login" class="w-full bg-black text-white py-3.5 px-6 font-black text-center hover:bg-gray-800 transition-colors">
+          <router-link to="/login" class="w-full bg-black text-white py-3.5 px-6 font-black text-center hover:bg-gray-800 transition-colors border-2 border-black">
             Войти
           </router-link>
           <router-link to="/register" class="w-full border-2 border-black text-black py-3 px-6 font-black text-center hover:bg-gray-100 transition-colors">
@@ -34,7 +34,7 @@
         </svg>
         <h2 class="text-2xl font-bold text-black mb-3">Ваша корзина пуста</h2>
         <p class="text-lg text-gray-500 mb-8">Добавьте товары из каталога, чтобы начать покупки.</p>
-        <router-link to="/" class="inline-block bg-black text-white py-3 px-8 text-lg font-semibold rounded-none hover:bg-gray-900 transition-colors">
+        <router-link to="/" class="inline-block bg-black text-white py-3 px-8 text-lg font-semibold rounded-none hover:bg-gray-900 transition-colors border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
           Перейти в каталог
         </router-link>
       </div>
@@ -46,31 +46,44 @@
         </div>
 
         <div class="lg:col-span-1">
-          <div class="bg-white border-2 border-gray-100 rounded-none p-8 shadow-sm sticky top-24">
-            <h2 class="text-2xl font-bold text-black mb-8">Итого</h2>
+          <!-- Привели блок Итого к стилю необрутализма -->
+          <div class="bg-white border-2 border-black rounded-none p-8 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] sticky top-24">
+            <h2 class="text-2xl font-extrabold text-black mb-8">Итого</h2>
             <div class="space-y-6 mb-8">
               <div class="flex justify-between text-lg text-gray-600">
                 <span>Товары ({{ cartStore.itemsCount }})</span>
-                <span>{{ cartStore.totalPrice.toFixed(2) }} руб.</span>
+                <span class="font-bold text-black">{{ formattedTotalPrice }} руб.</span>
               </div>
               <div class="flex justify-between text-lg text-gray-600">
                 <span>Доставка</span>
-                <span class="text-green-600 font-medium">Бесплатно</span>
+                <span class="text-green-600 font-bold">Бесплатно</span>
               </div>
-              <div class="border-t-2 border-gray-100 pt-6">
-                <div class="flex justify-between text-xl font-bold text-black">
+              <div class="border-t-2 border-black pt-6">
+                <div class="flex justify-between text-xl font-extrabold text-black">
                   <span>Общая стоимость</span>
-                  <span>{{ cartStore.totalPrice.toFixed(2) }} руб.</span>
+                  <span>{{ formattedTotalPrice }} руб.</span>
                 </div>
               </div>
             </div>
-            <button class="w-full bg-black text-white py-4 px-6 text-lg font-semibold rounded-none hover:bg-gray-900 transition-colors mb-4" @click="handleCheckout">
+            
+            <button 
+              class="w-full bg-black text-white py-4 px-6 text-lg font-bold rounded-none hover:bg-gray-900 transition-colors mb-4 border-2 border-black cursor-pointer shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] active:translate-x-1 active:translate-y-1 active:shadow-none" 
+              @click="handleCheckout"
+            >
               Оформить заказ
             </button>
-            <router-link to="/" class="block w-full bg-gray-100 text-black py-4 px-6 text-lg font-semibold rounded-none hover:bg-gray-200 transition-colors text-center">
+            
+            <router-link 
+              to="/" 
+              class="block w-full bg-gray-100 text-black py-4 px-6 text-lg font-bold rounded-none hover:bg-gray-200 transition-colors text-center border-2 border-black"
+            >
               Продолжить покупки
             </router-link>
-            <button @click="handleClearCart" class="w-full mt-6 text-base text-red-600 hover:text-red-700 transition-colors font-medium">
+            
+            <button 
+              @click="handleClearCart" 
+              class="w-full mt-6 text-base text-red-600 hover:text-red-700 transition-colors font-bold cursor-pointer"
+            >
               Очистить корзину
             </button>
           </div>
@@ -81,7 +94,7 @@
 </template>
 
 <script setup>
-import { onMounted } from 'vue'
+import { computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useCartStore } from '@/stores/cart'
 import { useAuthStore } from '@/stores/auth'
@@ -90,6 +103,11 @@ import CartItem from '@/components/CartItem.vue'
 const router = useRouter()
 const cartStore = useCartStore()
 const authStore = useAuthStore()
+
+const formattedTotalPrice = computed(() => {
+  const price = Number(cartStore.totalPrice)
+  return isNaN(price) ? '0.00' : price.toFixed(2)
+})
 
 function handleCheckout() {
   router.push('/checkout')

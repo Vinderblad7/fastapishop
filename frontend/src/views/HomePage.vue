@@ -22,7 +22,7 @@
             <button
               @click="productsStore.clearCategoryFilter()"
               :class="[
-                'px-4 py-2 text-sm font-bold border-2 border-black transition-all',
+                'px-4 py-2 text-sm font-bold border-2 border-black transition-all cursor-pointer',
                 !productsStore.selectedCategory
                   ? 'bg-black text-white shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]'
                   : 'bg-white text-black hover:bg-gray-100'
@@ -36,7 +36,7 @@
               :key="category.id"
               @click="productsStore.setCategory(category.id)"
               :class="[
-                'px-4 py-2 text-sm font-bold border-2 border-black transition-all',
+                'px-4 py-2 text-sm font-bold border-2 border-black transition-all cursor-pointer',
                 productsStore.selectedCategory === category.id
                   ? 'bg-black text-white shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]'
                   : 'bg-white text-black hover:bg-gray-100'
@@ -99,7 +99,7 @@
             <button
               :disabled="productsStore.currentPage === 1"
               @click="productsStore.setPage(productsStore.currentPage - 1)"
-              class="px-4 py-2 border-2 border-black font-bold disabled:opacity-30 disabled:cursor-not-allowed hover:bg-gray-100 transition-colors"
+              class="px-4 py-2 border-2 border-black font-bold disabled:opacity-30 disabled:cursor-not-allowed hover:bg-gray-100 transition-colors cursor-pointer"
             >
               ←
             </button>
@@ -109,7 +109,7 @@
               :key="page"
               @click="productsStore.setPage(page)"
               :class="[
-                'px-4 py-2 border-2 border-black font-bold transition-all',
+                'px-4 py-2 border-2 border-black font-bold transition-all cursor-pointer',
                 productsStore.currentPage === page
                   ? 'bg-black text-white'
                   : 'bg-white text-black hover:bg-gray-100'
@@ -121,7 +121,7 @@
             <button
               :disabled="productsStore.currentPage === totalPages"
               @click="productsStore.setPage(productsStore.currentPage + 1)"
-              class="px-4 py-2 border-2 border-black font-bold disabled:opacity-30 disabled:cursor-not-allowed hover:bg-gray-100 transition-colors"
+              class="px-4 py-2 border-2 border-black font-bold disabled:opacity-30 disabled:cursor-not-allowed hover:bg-gray-100 transition-colors cursor-pointer"
             >
               →
             </button>
@@ -177,7 +177,9 @@ const onPriceInput = () => {
 }
 
 const totalPages = computed(() => {
-  return Math.ceil(productsStore.totalProducts / productsStore.itemsPerPage) || 1
+  const itemsPerPage = Number(productsStore.itemsPerPage) || 10
+  const total = Number(productsStore.totalProducts) || 0
+  return Math.ceil(total / itemsPerPage) || 1
 })
 
 onMounted(async () => {
